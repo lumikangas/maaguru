@@ -1,0 +1,566 @@
+
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Maantiedon Guru: 195 Maan Maraton</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Outfit:wght@400;900&display=swap');
+        
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --neon-yellow: #f8ff00;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background: #020617;
+            color: white; 
+            overflow: hidden;
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+        }
+
+        .bungee { font-family: 'Bungee Inline', cursive; }
+
+        .glass { 
+            background: rgba(15, 23, 42, 0.96); 
+            backdrop-filter: blur(20px); 
+            border: 2px solid rgba(255, 255, 255, 0.1); 
+        }
+
+        #particle-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        .turbo-btn {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            box-shadow: 0 10px 20px rgba(188, 19, 254, 0.3);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-10px, 0); }
+            20%, 40%, 60%, 80% { transform: translate(10px, 0); }
+        }
+        .shake-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+        .option-btn {
+            text-align: left;
+            padding: 0.85rem 1.25rem;
+            border-radius: 1.25rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-weight: 800;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .option-btn.correct { 
+            background: #22c55e !important; 
+            border-color: #4ade80; 
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6); 
+            transform: scale(1.05);
+        }
+        .option-btn.wrong { background: #ef4444 !important; border-color: #f87171; opacity: 0.7; }
+
+        .flag-huge {
+            font-size: clamp(4rem, 18vw, 7rem);
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+            line-height: 1;
+        }
+
+        #commentary-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 200;
+            pointer-events: none;
+            width: 90%;
+            display: flex;
+            justify-content: center;
+        }
+
+        #commentary-inner {
+            opacity: 0;
+            background: #facc15;
+            color: black;
+            padding: 1.5rem 2rem;
+            border-radius: 2rem;
+            font-size: clamp(1.2rem, 5vw, 2.2rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 6px solid black;
+            box-shadow: 0 0 60px rgba(0,0,0,0.6);
+            text-align: center;
+            max-width: 100%;
+            word-wrap: break-word;
+            line-height: 1.1;
+        }
+
+        #commentary-inner.wrong-comment { background: #ef4444; color: white; border-color: #450a0a; }
+
+        .commentary-pop {
+            animation: spinPop 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes spinPop {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            10% { transform: scale(1) rotate(5deg); opacity: 1; }
+            90% { transform: scale(1.1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0.5) opacity: 0; }
+        }
+
+        @keyframes winPulse {
+            0% { box-shadow: 0 0 0px #facc15; }
+            50% { box-shadow: 0 0 50px #facc15; }
+            100% { box-shadow: 0 0 0px #facc15; }
+        }
+        .win-glow { animation: winPulse 2s infinite; border-color: #facc15 !important; }
+
+        .victory-title {
+            background: linear-gradient(to bottom, #fde047, #ca8a04);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3rem;
+            line-height: 1;
+        }
+
+        /* Leaderboard styling */
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4">
+    <canvas id="particle-canvas"></canvas>
+    
+    <div id="app" class="max-w-md w-full relative z-10 h-full max-h-[100dvh] flex flex-col justify-between py-2 mx-auto overflow-hidden">
+        
+        <div id="commentary-container">
+            <div id="commentary-inner">
+                <span id="commentary-text"></span>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="flex-none flex justify-between items-center mb-1 px-1">
+            <div class="flex-1">
+                <h1 class="text-3xl sm:text-4xl bungee text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 leading-none">GEOGURU</h1>
+                <div id="current-rank" class="text-[10px] font-black text-cyan-500 tracking-[0.1em] uppercase mt-1">EDISTYMINEN: 0%</div>
+            </div>
+            <div class="glass px-4 py-2 rounded-2xl flex flex-col items-end shrink-0 ml-2">
+                <span id="score" class="text-3xl font-black text-white tabular-nums leading-none">0</span>
+                <div id="combo-display" class="hidden text-[10px] font-black text-yellow-400 mt-1 uppercase">COMBO X<span id="combo-val">1.0</span></div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div id="main-card" class="glass rounded-[2rem] flex-1 flex flex-col relative border-white/10 overflow-hidden mb-1">
+            <div id="game-content" class="p-4 sm:p-6 flex-grow flex flex-col h-full">
+                
+                <!-- START VIEW -->
+                <div id="view-start" class="text-center flex flex-col justify-center h-full space-y-4 overflow-y-auto">
+                    <div class="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+                        <i class="fa-solid fa-earth-americas text-2xl text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-black italic uppercase text-white leading-tight">195 MAAN MARATON</h2>
+                    
+                    <!-- TOP 5 LIST -->
+                    <div class="bg-black/40 p-3 rounded-2xl border border-white/5 space-y-2">
+                        <p class="text-[10px] font-black text-cyan-400 tracking-widest uppercase mb-1">PÄIVÄN TOP 5</p>
+                        <div id="leaderboard-list" class="space-y-1">
+                            <!-- Lisätään JS:llä -->
+                        </div>
+                    </div>
+
+                    <button id="btn-start" class="w-full py-4 turbo-btn text-white font-black rounded-2xl tracking-widest text-lg uppercase shadow-xl active:scale-95 transition-transform">
+                        ALOITA PELI
+                    </button>
+                </div>
+
+                <!-- QUIZ VIEW -->
+                <div id="view-quiz" class="hidden flex flex-col h-full justify-between space-y-2">
+                    <div class="flex justify-between items-center text-[10px] font-black tracking-widest shrink-0">
+                        <div class="bg-white/10 px-3 py-1 rounded-full text-cyan-400">MAA <span id="current-q-num">1</span> / 195</div>
+                        <div class="text-orange-500 flex items-center gap-2">
+                            <i class="fa-solid fa-fire"></i> <span id="streak-val">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="h-32 flex items-center justify-center bg-slate-900/50 rounded-3xl border border-white/5">
+                        <div id="flag-display" class="flag-huge"></div>
+                    </div>
+
+                    <h2 id="question-text" class="text-lg font-black text-white uppercase text-center min-h-[4rem] flex items-center justify-center px-2"></h2>
+                    
+                    <div id="options-grid" class="grid grid-cols-1 gap-2"></div>
+                </div>
+
+                <!-- VICTORY VIEW -->
+                <div id="view-victory" class="hidden flex flex-col justify-center h-full text-center space-y-6">
+                    <div class="victory-title bungee">MAAILMAN<br>MESTARI!</div>
+                    <div class="text-6xl">🏆</div>
+                    <div class="bg-yellow-400/20 p-6 rounded-[2rem] border-2 border-yellow-400 win-glow">
+                        <p class="text-yellow-400 font-black text-xl mb-2 italic">USKOMATONTA!</p>
+                        <p class="text-white font-bold text-sm uppercase">Olet vastannut oikein kaikkiin 195 pääkaupunkiin!</p>
+                    </div>
+                    <button onclick="handleEndOfGame()" class="w-full py-5 bg-white text-black font-black rounded-2xl uppercase tracking-widest active:scale-95 transition-transform">TALLENNA TULOS</button>
+                </div>
+
+                <!-- GAMEOVER VIEW -->
+                <div id="view-gameover" class="hidden flex flex-col justify-center h-full text-center space-y-4">
+                    <h2 class="text-4xl font-black italic text-red-500 uppercase">MARATON KATKESI</h2>
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <p class="text-slate-500 text-[10px] font-black mb-1 uppercase">Oikea vastaus oli:</p>
+                        <p id="correct-answer-was" class="text-lg font-black text-yellow-400 uppercase italic"></p>
+                    </div>
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-white/60 text-xs font-bold uppercase">MAAT: <span id="fail-count" class="text-white">0</span> / 195</span>
+                        <span class="text-white/60 text-xs font-bold uppercase">PISTEET: <span id="final-score" class="text-white font-black">0</span></span>
+                    </div>
+                    
+                    <div id="name-save-section" class="pt-2">
+                        <input type="text" id="player-name" maxlength="10" placeholder="NIMIMERKKI..." class="w-full p-4 bg-white/10 border-2 border-white/20 rounded-2xl text-white font-black uppercase text-center focus:outline-none focus:border-cyan-400 mb-2">
+                        <button id="btn-save-score" class="w-full py-4 turbo-btn text-white font-black rounded-2xl uppercase active:scale-95 transition-transform">TALLENNA & JATKA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let particles = [];
+        let victoryInterval = null;
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        const COMMENTS_GOOD = ["VAU!", "KONE!", "LOISTAVAA!", "NERO!", "TÄYDELLISTÄ!", "GEOGURU!", "LIEKEISSÄ!", "JÄÄTÄVÄÄ!", "MALLIKASTA!", "USKOMATONTA!"];
+        const COMMENTS_BAD = ["HUTI!", "OHI!", "AIVAN METSÄÄN!", "EIPÄ OLLUT!", "HÄVETTÄVÄÄ!", "NOLOA!", "KARTTA KÄTEEN!", "VOI VIDE!"];
+
+        const MAAT = [
+            {n:"Suomi",c:"Helsinki",f:"🇫🇮"}, {n:"Ruotsi",c:"Tukholma",f:"🇸🇪"}, {n:"Norja",c:"Oslo",f:"🇳🇴"}, {n:"Tanska",c:"Kööpenhamina",f:"🇩🇰"},
+            {n:"Islanti",c:"Reykjavík",f:"🇮🇸"}, {n:"Viro",c:"Tallinna",f:"🇪🇪"}, {n:"Latvia",c:"Riika",f:"🇱🇻"}, {n:"Liettua",c:"Vilna",f:"🇱🇹"},
+            {n:"Saksa",c:"Berliini",f:"🇩🇪"}, {n:"Ranska",c:"Pariisi",f:"🇫🇷"}, {n:"Espanja",c:"Madrid",f:"🇪🇸"}, {n:"Portugali",c:"Lissabon",f:"🇵🇹"},
+            {n:"Italia",c:"Rooma",f:"🇮🇹"}, {n:"Kreikka",c:"Ateena",f:"🇬🇷"}, {n:"Britannia",c:"Lontoo",f:"🇬🇧"}, {n:"Irlanti",c:"Dublin",f:"🇮🇪"},
+            {n:"Hollanti",c:"Amsterdam",f:"🇳🇱"}, {n:"Belgia",c:"Bryssel",f:"🇧🇪"}, {n:"Sveitsi",c:"Bern",f:"🇨🇭"}, {n:"Itävalta",c:"Wien",f:"🇦🇹"},
+            {n:"Puola",c:"Varsova",f:"🇵🇱"}, {n:"Tšekki",c:"Praha",f:"🇨🇿"}, {n:"Unkari",c:"Budapest",f:"🇭🇺"}, {n:"Ukraina",c:"Kiova",f:"🇺🇦"},
+            {n:"Venäjä",c:"Moskova",f:"🇷🇺"}, {n:"Turkki",c:"Ankara",f:"🇹🇷"}, {n:"USA",c:"Washington, D.C.",f:"🇺🇸"}, {n:"Kanada",c:"Ottawa",f:"🇨🇦"},
+            {n:"Meksiko",c:"México",f:"🇲🇽"}, {n:"Brasilia",c:"Brasília",f:"🇧🇷"}, {n:"Argentiina",c:"Buenos Aires",f:"🇦🇷"}, {n:"Japani",c:"Tokio",f:"🇯🇵"},
+            {n:"Kiina",c:"Peking",f:"🇨🇳"}, {n:"Intia",c:"New Delhi",f:"🇮🇳"}, {n:"Australia",c:"Canberra",f:"🇦🇺"}, {n:"Egypti",c:"Kairo",f:"🇪🇬"},
+            {n:"Etelä-Afrikka",c:"Pretoria",f:"🇿🇦"}, {n:"Kenia",c:"Nairobi",f:"🇰🇪"}, {n:"Thaimaa",c:"Bangkok",f:"🇹🇭"}, {n:"Vietnam",c:"Hanoi",f:"🇻🇳"},
+            {n:"Israel",c:"Jerusalem",f:"🇮🇱"}, {n:"Saudi-Arabia",c:"Riad",f:"🇸🇦"}, {n:"Uusi-Seelanti",c:"Wellington",f:"🇳🇿"},
+            {n:"Afganistan",c:"Kabul",f:"🇦🇫"}, {n:"Albania",c:"Tirana",f:"🇦🇱"}, {n:"Algeria",c:"Algiers",f:"🇩🇿"}, {n:"Andorra",c:"Andorra la Vella",f:"🇦🇩"},
+            {n:"Angola",c:"Luanda",f:"🇦🇴"}, {n:"Bahama",c:"Nassau",f:"🇧🇸"}, {n:"Bahrain",c:"Manama",f:"🇧🇭"}, {n:"Bangladesh",c:"Dhaka",f:"🇧🇩"},
+            {n:"Barbados",c:"Bridgetown",f:"🇧🇧"}, {n:"Valko-Venäjä",c:"Minsk",f:"🇧🇾"}, {n:"Belize",c:"Belmopan",f:"🇧🇿"}, {n:"Benin",c:"Porto-Novo",f:"🇧🇯"},
+            {n:"Bhutan",c:"Thimphu",f:"🇧🇹"}, {n:"Bolivia",c:"Sucre",f:"🇧🇴"}, {n:"Bosnia ja Hertsegovina",c:"Sarajevo",f:"🇧🇦"}, {n:"Botswana",c:"Gaborone",f:"🇧🇼"},
+            {n:"Brunei",c:"Bandar Seri Begawan",f:"🇧🇳"}, {n:"Bulgaria",c:"Sofia",f:"🇧🇬"}, {n:"Burkina Faso",c:"Ouagadougou",f:"🇧🇫"}, {n:"Burundi",c:"Gitega",f:"🇧🇮"},
+            {n:"Kambodža",c:"Phnom Penh",f:"🇰🇭"}, {n:"Kamerun",c:"Yaoundé",f:"🇨🇲"}, {n:"Kap Verde",c:"Praia",f:"🇨🇻"}, {n:"Keski-Afrikka",c:"Bangui",f:"🇨🇫"},
+            {n:"Tšad",c:"N'Djamena",f:"🇹🇩"}, {n:"Chile",c:"Santiago",f:"🇨🇱"}, {n:"Kolumbia",c:"Bogotá",f:"🇨🇴"}, {n:"Komorit",c:"Moroni",f:"🇰🇲"},
+            {n:"Kongo",c:"Brazzaville",f:"🇨🇬"}, {n:"Kongo (DRC)",c:"Kinshasa",f:"🇨🇩"}, {n:"Costa Rica",c:"San José",f:"🇨🇷"}, {n:"Kroatia",c:"Zagreb",f:"🇭🇷"},
+            {n:"Kuuba",c:"Havanna",f:"🇨🇺"}, {n:"Kypros",c:"Nikosia",f:"🇨🇾"}, {n:"Djibouti",c:"Djibouti",f:"🇩🇯"}, {n:"Dominica",c:"Roseau",f:"🇩🇲"},
+            {n:"Dominikaaninen tasavalta",c:"Santo Domingo",f:"🇩🇴"}, {n:"Ecuador",c:"Quito",f:"🇪🇨"}, {n:"El Salvador",c:"San Salvador",f:"🇸🇻"},
+            {n:"Eritrea",c:"Asmara",f:"🇪🇷"}, {n:"Etiopia",c:"Addis Abeba",f:"🇪🇹"}, {n:"Fidži",c:"Suva",f:"🇫🇯"}, {n:"Gabon",c:"Libreville",f:"🇬🇦"},
+            {n:"Gambia",c:"Banjul",f:"🇬🇲"}, {n:"Georgia",c:"Tbilisi",f:"🇬🇪"}, {n:"Ghana",c:"Accra",f:"🇬🇭"}, {n:"Grenada",c:"St. George's",f:"🇬🇩"},
+            {n:"Guatemala",c:"Guatemala",f:"🇬🇹"}, {n:"Guinea",c:"Conakry",f:"🇬🇳"}, {n:"Guinea-Bissau",c:"Bissau",f:"🇬🇼"}, {n:"Guyana",c:"Georgetown",f:"🇬🇾"},
+            {n:"Haiti",c:"Port-au-Prince",f:"🇭🇹"}, {n:"Honduras",c:"Tegucigalpa",f:"🇭🇳"}, {n:"Indonesia",c:"Jakarta",f:"🇮🇩"}, {n:"Iran",c:"Teheran",f:"🇮🇷"},
+            {n:"Irak",c:"Bagdad",f:"🇮🇶"}, {n:"Jamaika",c:"Kingston",f:"🇯🇲"}, {n:"Jordania",c:"Amman",f:"🇯🇴"}, {n:"Kazakstan",c:"Astana",f:"🇰🇿"},
+            {n:"Kiribati",c:"Etelä-Tarawa",f:"🇰🇮"}, {n:"Pohjois-Korea",c:"Pjongjang",f:"🇰🇵"}, {n:"Etelä-Korea",c:"Soul",f:"🇰🇷"}, {n:"Kuwait",c:"Kuwait",f:"🇰🇼"},
+            {n:"Kirgisia",c:"Biškek",f:"🇰🇬"}, {n:"Laos",c:"Vientiane",f:"🇱🇦"}, {n:"Libanon",c:"Beirut",f:"🇱🇧"}, {n:"Lesotho",c:"Maseru",f:"🇱🇸"},
+            {n:"Liberia",c:"Monrovia",f:"🇱🇷"}, {n:"Libya",c:"Tripoli",f:"🇱🇾"}, {n:"Liechtenstein",c:"Vaduz",f:"🇱🇮"}, {n:"Luxemburg",c:"Luxemburg",f:"🇱🇺"},
+            {n:"Madagaskar",c:"Antananarivo",f:"🇲🇬"}, {n:"Malawi",c:"Lilongwe",f:"🇲🇼"}, {n:"Malesia",c:"Kuala Lumpur",f:"🇲🇾"}, {n:"Malediivit",c:"Malé",f:"🇲🇻"},
+            {n:"Mali",c:"Bamako",f:"🇲🇱"}, {n:"Malta",c:"Valletta",f:"🇲🇹"}, {n:"Mauritania",c:"Nouakchott",f:"🇲🇷"}, {n:"Mauritius",c:"Port Louis",f:"🇲🇺"},
+            {n:"Moldova",c:"Chisinau",f:"🇲🇩"}, {n:"Monaco",c:"Monaco",f:"🇲🇨"}, {n:"Mongolia",c:"Ulaanbaatar",f:"🇲🇳"}, {n:"Montenegro",c:"Podgorica",f:"🇲🇪"},
+            {n:"Marokko",c:"Rabat",f:"🇲🇦"}, {n:"Mosambik",c:"Maputo",f:"🇲🇿"}, {n:"Myanmar",c:"Naypyidaw",f:"🇲🇲"}, {n:"Namibia",c:"Windhoek",f:"🇳🇦"},
+            {n:"Nauru",c:"Yaren",f:"🇳🇷"}, {n:"Nepal",c:"Katmandu",f:"🇳🇵"}, {n:"Nicaragua",c:"Managua",f:"🇳🇮"}, {n:"Niger",c:"Niamey",f:"🇳🇪"},
+            {n:"Nigeria",c:"Abuja",f:"🇳🇬"}, {n:"Pohjois-Makedonia",c:"Skopje",f:"🇲🇰"}, {n:"Oman",c:"Masqat",f:"🇴🇲"}, {n:"Pakistan",c:"Islamabad",f:"🇵🇰"},
+            {n:"Palau",c:"Ngerulmud",f:"🇵🇼"}, {n:"Palestiina",c:"Ramallah",f:"🇵🇸"}, {n:"Panama",c:"Panama",f:"🇵🇦"}, {n:"Papua-Uusi-Guinea",c:"Port Moresby",f:"🇵🇬"},
+            {n:"Paraguay",c:"Asunción",f:"🇵🇾"}, {n:"Peru",c:"Lima",f:"🇵🇪"}, {n:"Filippiinit",c:"Manila",f:"🇵🇭"}, {n:"Qatar",c:"Doha",f:"🇶🇦"},
+            {n:"Romania",c:"Bukarest",f:"🇷🇴"}, {n:"Ruanda",c:"Kigali",f:"🇷🇼"}, {n:"Samoa",c:"Apia",f:"🇼🇸"}, {n:"San Marino",c:"San Marino",f:"🇸🇲"},
+            {n:"Senegal",c:"Dakar",f:"🇸🇳"}, {n:"Serbia",c:"Belgrad",f:"🇷🇸"}, {n:"Seychellit",c:"Victoria",f:"🇸🇨"}, {n:"Sierra Leone",c:"Freetown",f:"🇸🇱"},
+            {n:"Singapore",c:"Singapore",f:"🇸🇬"}, {n:"Slovakia",c:"Bratislava",f:"🇸🇰"}, {n:"Slovenia",c:"Ljubljana",f:"🇸🇮"}, {n:"Salomonsaaret",c:"Honiara",f:"🇸🇧"},
+            {n:"Somalia",c:"Mogadishu",f:"🇸🇴"}, {n:"Etelä-Sudan",c:"Juba",f:"🇸🇸"}, {n:"Sri Lanka",c:"Sri Jayawardenepura Kotte",f:"🇱🇰"}, {n:"Sudan",c:"Khartum",f:"🇸🇩"},
+            {n:"Suriname",c:"Paramaribo",f:"🇸🇷"}, {n:"Syyria",c:"Damaskos",f:"🇸🇾"}, {n:"Taiwan",c:"Taipei",f:"🇹🇼"}, {n:"Tadžikistan",c:"Dušanbe",f:"🇹🇯"},
+            {n:"Tansania",c:"Dodoma",f:"🇹🇿"}, {n:"Togo",c:"Lomé",f:"🇹🇬"}, {n:"Tonga",c:"Nuku'alofa",f:"🇹🇴"}, {n:"Trinidad ja Tobago",c:"Port of Spain",f:"🇹🇹"},
+            {n:"Tunisia",c:"Tunis",f:"🇹🇳"}, {n:"Turkmenistan",c:"Ašgabat",f:"🇹🇲"}, {n:"Tuvalu",c:"Funafuti",f:"🇹🇻"}, {n:"Uganda",c:"Kampala",f:"🇺🇬"},
+            {n:"Arabiemiraatit",c:"Abu Dhabi",f:"🇦🇪"}, {n:"Uruguay",c:"Montevideo",f:"🇺🇾"}, {n:"Uzbekistan",c:"Taškent",f:"🇺🇿"}, {n:"Vanuatu",c:"Port Vila",f:"🇻🇺"},
+            {n:"Vatikaani",c:"Vatikaani",f:"🇻🇦"}, {n:"Venezuela",c:"Caracas",f:"🇻🇪"}, {n:"Jemen",c:"Sanaa",f:"🇾🇪"}, {n:"Zambia",c:"Lusaka",f:"🇿🇲"}, {n:"Zimbabwe",c:"Harare",f:"🇿🇼"}
+        ];
+
+        let state = {
+            score: 0, streak: 0, multiplier: 1.0, current: null, isBusy: false,
+            deck: [], totalCount: MAAT.length, completedCount: 0,
+            highScores: JSON.parse(localStorage.getItem('geoguru_top5') || '[]')
+        };
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSfx(type) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const g = audioCtx.createGain(); g.connect(audioCtx.destination);
+            
+            if (type === 'correct') {
+                const o = audioCtx.createOscillator(); o.connect(g);
+                o.type = 'sine';
+                o.frequency.setValueAtTime(500, now); o.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                g.gain.setValueAtTime(0.1, now); g.gain.linearRampToValueAtTime(0, now + 0.2);
+                o.start(); o.stop(now + 0.2);
+            } else if (type === 'wrong') {
+                const o1 = audioCtx.createOscillator();
+                const o2 = audioCtx.createOscillator();
+                o1.connect(g); o2.connect(g);
+                o1.type = 'sawtooth'; o2.type = 'square';
+                o1.frequency.setValueAtTime(100, now); o1.frequency.linearRampToValueAtTime(40, now + 0.5);
+                o2.frequency.setValueAtTime(105, now); o2.frequency.linearRampToValueAtTime(45, now + 0.5);
+                g.gain.setValueAtTime(0.2, now); g.gain.linearRampToValueAtTime(0, now + 0.5);
+                o1.start(); o2.start();
+                o1.stop(now + 0.5); o2.stop(now + 0.5);
+            } else if (type === 'victory') {
+                [523, 659, 783, 1046].forEach((f, i) => {
+                    const o = audioCtx.createOscillator(); o.connect(g);
+                    o.frequency.setValueAtTime(f, now + (i * 0.1));
+                    g.gain.setValueAtTime(0.1, now + (i * 0.1)); g.gain.linearRampToValueAtTime(0, now + (i * 0.1) + 0.5);
+                    o.start(now + (i * 0.1)); o.stop(now + (i * 0.1) + 0.5);
+                });
+            }
+        }
+
+        function updateLeaderboardUI() {
+            const list = document.getElementById('leaderboard-list');
+            if (!state.highScores || !state.highScores.length) {
+                list.innerHTML = '<p class="text-[10px] text-white/30 italic">Ei vielä tuloksia...</p>';
+                return;
+            }
+            list.innerHTML = state.highScores.map((s, i) => `
+                <div class="leaderboard-row">
+                    <span>${i+1}. ${s.name}</span>
+                    <span class="text-yellow-400">${s.score.toLocaleString()}</span>
+                </div>
+            `).join('');
+        }
+
+        function saveHighScore() {
+            const name = document.getElementById('player-name').value.trim().toUpperCase() || 'GEONAUTTI';
+            state.highScores.push({ name, score: state.score });
+            state.highScores.sort((a, b) => b.score - a.score);
+            state.highScores = state.highScores.slice(0, 5);
+            localStorage.setItem('geoguru_top5', JSON.stringify(state.highScores));
+            restartGame();
+        }
+
+        function handleAnswer(text, btn) {
+            if (state.isBusy) return;
+            state.isBusy = true;
+            initAudio();
+
+            const isCorrect = text === state.current.correctValue;
+            if (isCorrect) {
+                btn.classList.add('correct');
+                playSfx('correct');
+                createFireworks();
+                
+                state.streak++;
+                state.multiplier = Math.min(10.0, 1.0 + (state.streak * 0.2));
+                state.score += Math.floor(1000 * state.multiplier);
+                
+                document.getElementById('score').innerText = state.score.toLocaleString();
+                document.getElementById('streak-val').innerText = state.streak;
+                document.getElementById('current-rank').innerText = `EDISTYMINEN: ${Math.floor((state.completedCount / state.totalCount) * 100)}%`;
+                
+                const combo = document.getElementById('combo-display');
+                combo.classList.remove('hidden');
+                document.getElementById('combo-val').innerText = state.multiplier.toFixed(1);
+                
+                showCommentary(true);
+
+                if (state.deck.length === 0) {
+                    setTimeout(showVictory, 2000);
+                } else {
+                    setTimeout(nextQuestion, 1800);
+                }
+            } else {
+                btn.classList.add('wrong');
+                playSfx('wrong');
+                document.body.classList.add('shake-effect');
+                
+                document.querySelectorAll('.option-btn').forEach(b => {
+                    if (b.innerText === state.current.correctValue) b.classList.add('correct');
+                });
+                
+                showCommentary(false);
+                document.getElementById('correct-answer-was').innerText = state.current.correctValue;
+                document.getElementById('fail-count').innerText = state.completedCount - 1;
+                document.getElementById('final-score').innerText = state.score.toLocaleString();
+                
+                setTimeout(() => {
+                    document.body.classList.remove('shake-effect');
+                    document.getElementById('view-quiz').classList.add('hidden');
+                    document.getElementById('view-gameover').classList.remove('hidden');
+                    state.isBusy = false;
+                }, 2000);
+            }
+        }
+
+        function createFireworks(x, y, power = 15) {
+            const colors = ['#facc15', '#00f2ff', '#bc13fe', '#ffffff', '#22c55e'];
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: x || canvas.width / 2, y: y || canvas.height / 2,
+                    vx: (Math.random() - 0.5) * power, vy: (Math.random() - 0.5) * power,
+                    size: Math.random() * 3 + 1, color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 1.0, gravity: 0.2
+                });
+            }
+        }
+
+        function showVictory() {
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-victory').classList.remove('hidden');
+            playSfx('victory');
+            if (victoryInterval) clearInterval(victoryInterval);
+            victoryInterval = setInterval(() => {
+                createFireworks(Math.random() * canvas.width, Math.random() * canvas.height, 10);
+            }, 300);
+            state.isBusy = false;
+        }
+
+        function handleEndOfGame() {
+            document.getElementById('view-victory').classList.add('hidden');
+            document.getElementById('view-gameover').classList.remove('hidden');
+            document.getElementById('fail-count').innerText = state.totalCount;
+            document.getElementById('final-score').innerText = state.score.toLocaleString();
+        }
+
+        function showCommentary(isGood) {
+            const inner = document.getElementById('commentary-inner');
+            const txt = document.getElementById('commentary-text');
+            txt.innerText = isGood ? COMMENTS_GOOD[Math.floor(Math.random() * COMMENTS_GOOD.length)] : COMMENTS_BAD[Math.floor(Math.random() * COMMENTS_BAD.length)];
+            inner.className = isGood ? '' : 'wrong-comment';
+            inner.classList.remove('commentary-pop');
+            void inner.offsetWidth;
+            inner.classList.add('commentary-pop');
+        }
+
+        function nextQuestion() {
+            state.isBusy = false;
+            
+            if (state.deck.length === 0) {
+                showVictory();
+                return;
+            }
+
+            const country = state.deck.pop();
+            state.completedCount++;
+            
+            const pool = MAAT.map(m => m.c);
+            let options = [country.c];
+            while (options.length < 4) {
+                const randC = pool[Math.floor(Math.random() * pool.length)];
+                if (!options.includes(randC)) options.push(randC);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            state.current = { correctValue: country.c };
+            document.getElementById('flag-display').innerText = country.f;
+            document.getElementById('question-text').innerText = `MIKÄ ON MAAN ${country.n.toUpperCase()} PÄÄKAUPUNKI?`;
+            document.getElementById('current-q-num').innerText = state.completedCount;
+            
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            options.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = 'option-btn';
+                b.innerText = opt;
+                b.onclick = () => handleAnswer(opt, b);
+                grid.appendChild(b);
+            });
+
+            document.getElementById('view-start').classList.add('hidden');
+            document.getElementById('view-quiz').classList.remove('hidden');
+            document.getElementById('view-gameover').classList.add('hidden');
+            document.getElementById('view-victory').classList.add('hidden');
+        }
+
+        function restartGame() {
+            if (victoryInterval) clearInterval(victoryInterval);
+            state.score = 0;
+            state.streak = 0;
+            state.multiplier = 1.0;
+            state.completedCount = 0;
+            state.deck = [...MAAT].sort(() => Math.random() - 0.5);
+            state.isBusy = false;
+            
+            document.getElementById('score').innerText = "0";
+            document.getElementById('streak-val').innerText = "0";
+            document.getElementById('combo-display').classList.add('hidden');
+            document.getElementById('current-rank').innerText = "EDISTYMINEN: 0%";
+            document.getElementById('player-name').value = "";
+            
+            updateLeaderboardUI();
+            
+            document.getElementById('view-quiz').classList.add('hidden');
+            document.getElementById('view-gameover').classList.add('hidden');
+            document.getElementById('view-victory').classList.add('hidden');
+            document.getElementById('view-start').classList.remove('hidden');
+        }
+
+        function initParticles() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += p.gravity;
+                p.life -= 0.02;
+                ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('btn-start').onclick = () => {
+            initAudio();
+            // Alustetaan pakka ennen pelin alkua varmuuden vuoksi
+            state.deck = [...MAAT].sort(() => Math.random() - 0.5);
+            nextQuestion();
+        };
+
+        document.getElementById('btn-save-score').onclick = saveHighScore;
+
+        window.addEventListener('resize', initParticles);
+        initParticles(); 
+        updateLeaderboardUI();
+        animate();
+    </script>
+</body>
+</html>
