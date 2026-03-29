@@ -232,7 +232,7 @@
 
                 <!-- GAMEOVER VIEW -->
                 <div id="view-gameover" class="hidden flex flex-col justify-center h-full text-center space-y-4">
-                    <h2 class="text-4xl font-black italic text-red-500 uppercase">MARATON KATKESI</h2>
+                    <h2 class="text-4xl font-black italic text-red-500 uppercase">Maailma ei ole vielä valmis</h2>
                     <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
                         <p class="text-slate-500 text-[10px] font-black mb-1 uppercase">Oikea vastaus oli:</p>
                         <p id="correct-answer-was" class="text-lg font-black text-yellow-400 uppercase italic"></p>
@@ -258,56 +258,30 @@
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
 
-        const COMMENTS_GOOD = ["VAU!", "KONE!", "LOISTAVAA!", "NERO!", "TÄYDELLISTÄ!", "GEOGURU!", "LIEKEISSÄ!", "JÄÄTÄVÄÄ!", "MALLIKASTA!", "USKOMATONTA!"];
+        const COMMENTS_GOOD = ["VAU!", "KONE!", "LOISTAVAA!", "TULEE PISSA HOUSUUN!", "NERO!", "TÄYDELLISTÄ!", "GEOGURU!", "LIEKEISSÄ!", "JÄÄTÄVÄÄ!", "MALLIKASTA!", "USKOMATONTA!"];
         const COMMENTS_BAD = ["HUTI!", "OHI!", "AIVAN METSÄÄN!", "EIPÄ OLLUT!", "HÄVETTÄVÄÄ!", "NOLOA!", "KARTTA KÄTEEN!", "VOI VIDE!"];
 
         const MAAT = [
-            {n:"Suomi",c:"Helsinki",f:"🇫🇮"}, {n:"Ruotsi",c:"Tukholma",f:"🇸🇪"}, {n:"Norja",c:"Oslo",f:"🇳🇴"}, {n:"Tanska",c:"Kööpenhamina",f:"🇩🇰"},
-            {n:"Islanti",c:"Reykjavík",f:"🇮🇸"}, {n:"Viro",c:"Tallinna",f:"🇪🇪"}, {n:"Latvia",c:"Riika",f:"🇱🇻"}, {n:"Liettua",c:"Vilna",f:"🇱🇹"},
-            {n:"Saksa",c:"Berliini",f:"🇩🇪"}, {n:"Ranska",c:"Pariisi",f:"🇫🇷"}, {n:"Espanja",c:"Madrid",f:"🇪🇸"}, {n:"Portugali",c:"Lissabon",f:"🇵🇹"},
-            {n:"Italia",c:"Rooma",f:"🇮🇹"}, {n:"Kreikka",c:"Ateena",f:"🇬🇷"}, {n:"Britannia",c:"Lontoo",f:"🇬🇧"}, {n:"Irlanti",c:"Dublin",f:"🇮🇪"},
-            {n:"Hollanti",c:"Amsterdam",f:"🇳🇱"}, {n:"Belgia",c:"Bryssel",f:"🇧🇪"}, {n:"Sveitsi",c:"Bern",f:"🇨🇭"}, {n:"Itävalta",c:"Wien",f:"🇦🇹"},
-            {n:"Puola",c:"Varsova",f:"🇵🇱"}, {n:"Tšekki",c:"Praha",f:"🇨🇿"}, {n:"Unkari",c:"Budapest",f:"🇭🇺"}, {n:"Ukraina",c:"Kiova",f:"🇺🇦"},
-            {n:"Venäjä",c:"Moskova",f:"🇷🇺"}, {n:"Turkki",c:"Ankara",f:"🇹🇷"}, {n:"USA",c:"Washington, D.C.",f:"🇺🇸"}, {n:"Kanada",c:"Ottawa",f:"🇨🇦"},
-            {n:"Meksiko",c:"México",f:"🇲🇽"}, {n:"Brasilia",c:"Brasília",f:"🇧🇷"}, {n:"Argentiina",c:"Buenos Aires",f:"🇦🇷"}, {n:"Japani",c:"Tokio",f:"🇯🇵"},
-            {n:"Kiina",c:"Peking",f:"🇨🇳"}, {n:"Intia",c:"New Delhi",f:"🇮🇳"}, {n:"Australia",c:"Canberra",f:"🇦🇺"}, {n:"Egypti",c:"Kairo",f:"🇪🇬"},
-            {n:"Etelä-Afrikka",c:"Pretoria",f:"🇿🇦"}, {n:"Kenia",c:"Nairobi",f:"🇰🇪"}, {n:"Thaimaa",c:"Bangkok",f:"🇹🇭"}, {n:"Vietnam",c:"Hanoi",f:"🇻🇳"},
-            {n:"Israel",c:"Jerusalem",f:"🇮🇱"}, {n:"Saudi-Arabia",c:"Riad",f:"🇸🇦"}, {n:"Uusi-Seelanti",c:"Wellington",f:"🇳🇿"},
-            {n:"Afganistan",c:"Kabul",f:"🇦🇫"}, {n:"Albania",c:"Tirana",f:"🇦🇱"}, {n:"Algeria",c:"Algiers",f:"🇩🇿"}, {n:"Andorra",c:"Andorra la Vella",f:"🇦🇩"},
-            {n:"Angola",c:"Luanda",f:"🇦🇴"}, {n:"Bahama",c:"Nassau",f:"🇧🇸"}, {n:"Bahrain",c:"Manama",f:"🇧🇭"}, {n:"Bangladesh",c:"Dhaka",f:"🇧🇩"},
-            {n:"Barbados",c:"Bridgetown",f:"🇧🇧"}, {n:"Valko-Venäjä",c:"Minsk",f:"🇧🇾"}, {n:"Belize",c:"Belmopan",f:"🇧🇿"}, {n:"Benin",c:"Porto-Novo",f:"🇧🇯"},
-            {n:"Bhutan",c:"Thimphu",f:"🇧🇹"}, {n:"Bolivia",c:"Sucre",f:"🇧🇴"}, {n:"Bosnia ja Hertsegovina",c:"Sarajevo",f:"🇧🇦"}, {n:"Botswana",c:"Gaborone",f:"🇧🇼"},
-            {n:"Brunei",c:"Bandar Seri Begawan",f:"🇧🇳"}, {n:"Bulgaria",c:"Sofia",f:"🇧🇬"}, {n:"Burkina Faso",c:"Ouagadougou",f:"🇧🇫"}, {n:"Burundi",c:"Gitega",f:"🇧🇮"},
-            {n:"Kambodža",c:"Phnom Penh",f:"🇰🇭"}, {n:"Kamerun",c:"Yaoundé",f:"🇨🇲"}, {n:"Kap Verde",c:"Praia",f:"🇨🇻"}, {n:"Keski-Afrikka",c:"Bangui",f:"🇨🇫"},
-            {n:"Tšad",c:"N'Djamena",f:"🇹🇩"}, {n:"Chile",c:"Santiago",f:"🇨🇱"}, {n:"Kolumbia",c:"Bogotá",f:"🇨🇴"}, {n:"Komorit",c:"Moroni",f:"🇰🇲"},
-            {n:"Kongo",c:"Brazzaville",f:"🇨🇬"}, {n:"Kongo (DRC)",c:"Kinshasa",f:"🇨🇩"}, {n:"Costa Rica",c:"San José",f:"🇨🇷"}, {n:"Kroatia",c:"Zagreb",f:"🇭🇷"},
-            {n:"Kuuba",c:"Havanna",f:"🇨🇺"}, {n:"Kypros",c:"Nikosia",f:"🇨🇾"}, {n:"Djibouti",c:"Djibouti",f:"🇩🇯"}, {n:"Dominica",c:"Roseau",f:"🇩🇲"},
-            {n:"Dominikaaninen tasavalta",c:"Santo Domingo",f:"🇩🇴"}, {n:"Ecuador",c:"Quito",f:"🇪🇨"}, {n:"El Salvador",c:"San Salvador",f:"🇸🇻"},
-            {n:"Eritrea",c:"Asmara",f:"🇪🇷"}, {n:"Etiopia",c:"Addis Abeba",f:"🇪🇹"}, {n:"Fidži",c:"Suva",f:"🇫🇯"}, {n:"Gabon",c:"Libreville",f:"🇬🇦"},
-            {n:"Gambia",c:"Banjul",f:"🇬🇲"}, {n:"Georgia",c:"Tbilisi",f:"🇬🇪"}, {n:"Ghana",c:"Accra",f:"🇬🇭"}, {n:"Grenada",c:"St. George's",f:"🇬🇩"},
-            {n:"Guatemala",c:"Guatemala",f:"🇬🇹"}, {n:"Guinea",c:"Conakry",f:"🇬🇳"}, {n:"Guinea-Bissau",c:"Bissau",f:"🇬🇼"}, {n:"Guyana",c:"Georgetown",f:"🇬🇾"},
-            {n:"Haiti",c:"Port-au-Prince",f:"🇭🇹"}, {n:"Honduras",c:"Tegucigalpa",f:"🇭🇳"}, {n:"Indonesia",c:"Jakarta",f:"🇮🇩"}, {n:"Iran",c:"Teheran",f:"🇮🇷"},
-            {n:"Irak",c:"Bagdad",f:"🇮🇶"}, {n:"Jamaika",c:"Kingston",f:"🇯🇲"}, {n:"Jordania",c:"Amman",f:"🇯🇴"}, {n:"Kazakstan",c:"Astana",f:"🇰🇿"},
-            {n:"Kiribati",c:"Etelä-Tarawa",f:"🇰🇮"}, {n:"Pohjois-Korea",c:"Pjongjang",f:"🇰🇵"}, {n:"Etelä-Korea",c:"Soul",f:"🇰🇷"}, {n:"Kuwait",c:"Kuwait",f:"🇰🇼"},
-            {n:"Kirgisia",c:"Biškek",f:"🇰🇬"}, {n:"Laos",c:"Vientiane",f:"🇱🇦"}, {n:"Libanon",c:"Beirut",f:"🇱🇧"}, {n:"Lesotho",c:"Maseru",f:"🇱🇸"},
-            {n:"Liberia",c:"Monrovia",f:"🇱🇷"}, {n:"Libya",c:"Tripoli",f:"🇱🇾"}, {n:"Liechtenstein",c:"Vaduz",f:"🇱🇮"}, {n:"Luxemburg",c:"Luxemburg",f:"🇱🇺"},
-            {n:"Madagaskar",c:"Antananarivo",f:"🇲🇬"}, {n:"Malawi",c:"Lilongwe",f:"🇲🇼"}, {n:"Malesia",c:"Kuala Lumpur",f:"🇲🇾"}, {n:"Malediivit",c:"Malé",f:"🇲🇻"},
-            {n:"Mali",c:"Bamako",f:"🇲🇱"}, {n:"Malta",c:"Valletta",f:"🇲🇹"}, {n:"Mauritania",c:"Nouakchott",f:"🇲🇷"}, {n:"Mauritius",c:"Port Louis",f:"🇲🇺"},
-            {n:"Moldova",c:"Chisinau",f:"🇲🇩"}, {n:"Monaco",c:"Monaco",f:"🇲🇨"}, {n:"Mongolia",c:"Ulaanbaatar",f:"🇲🇳"}, {n:"Montenegro",c:"Podgorica",f:"🇲🇪"},
-            {n:"Marokko",c:"Rabat",f:"🇲🇦"}, {n:"Mosambik",c:"Maputo",f:"🇲🇿"}, {n:"Myanmar",c:"Naypyidaw",f:"🇲🇲"}, {n:"Namibia",c:"Windhoek",f:"🇳🇦"},
-            {n:"Nauru",c:"Yaren",f:"🇳🇷"}, {n:"Nepal",c:"Katmandu",f:"🇳🇵"}, {n:"Nicaragua",c:"Managua",f:"🇳🇮"}, {n:"Niger",c:"Niamey",f:"🇳🇪"},
-            {n:"Nigeria",c:"Abuja",f:"🇳🇬"}, {n:"Pohjois-Makedonia",c:"Skopje",f:"🇲🇰"}, {n:"Oman",c:"Masqat",f:"🇴🇲"}, {n:"Pakistan",c:"Islamabad",f:"🇵🇰"},
-            {n:"Palau",c:"Ngerulmud",f:"🇵🇼"}, {n:"Palestiina",c:"Ramallah",f:"🇵🇸"}, {n:"Panama",c:"Panama",f:"🇵🇦"}, {n:"Papua-Uusi-Guinea",c:"Port Moresby",f:"🇵🇬"},
-            {n:"Paraguay",c:"Asunción",f:"🇵🇾"}, {n:"Peru",c:"Lima",f:"🇵🇪"}, {n:"Filippiinit",c:"Manila",f:"🇵🇭"}, {n:"Qatar",c:"Doha",f:"🇶🇦"},
-            {n:"Romania",c:"Bukarest",f:"🇷🇴"}, {n:"Ruanda",c:"Kigali",f:"🇷🇼"}, {n:"Samoa",c:"Apia",f:"🇼🇸"}, {n:"San Marino",c:"San Marino",f:"🇸🇲"},
-            {n:"Senegal",c:"Dakar",f:"🇸🇳"}, {n:"Serbia",c:"Belgrad",f:"🇷🇸"}, {n:"Seychellit",c:"Victoria",f:"🇸🇨"}, {n:"Sierra Leone",c:"Freetown",f:"🇸🇱"},
-            {n:"Singapore",c:"Singapore",f:"🇸🇬"}, {n:"Slovakia",c:"Bratislava",f:"🇸🇰"}, {n:"Slovenia",c:"Ljubljana",f:"🇸🇮"}, {n:"Salomonsaaret",c:"Honiara",f:"🇸🇧"},
-            {n:"Somalia",c:"Mogadishu",f:"🇸🇴"}, {n:"Etelä-Sudan",c:"Juba",f:"🇸🇸"}, {n:"Sri Lanka",c:"Sri Jayawardenepura Kotte",f:"🇱🇰"}, {n:"Sudan",c:"Khartum",f:"🇸🇩"},
-            {n:"Suriname",c:"Paramaribo",f:"🇸🇷"}, {n:"Syyria",c:"Damaskos",f:"🇸🇾"}, {n:"Taiwan",c:"Taipei",f:"🇹🇼"}, {n:"Tadžikistan",c:"Dušanbe",f:"🇹🇯"},
-            {n:"Tansania",c:"Dodoma",f:"🇹🇿"}, {n:"Togo",c:"Lomé",f:"🇹🇬"}, {n:"Tonga",c:"Nuku'alofa",f:"🇹🇴"}, {n:"Trinidad ja Tobago",c:"Port of Spain",f:"🇹🇹"},
-            {n:"Tunisia",c:"Tunis",f:"🇹🇳"}, {n:"Turkmenistan",c:"Ašgabat",f:"🇹🇲"}, {n:"Tuvalu",c:"Funafuti",f:"🇹🇻"}, {n:"Uganda",c:"Kampala",f:"🇺🇬"},
-            {n:"Arabiemiraatit",c:"Abu Dhabi",f:"🇦🇪"}, {n:"Uruguay",c:"Montevideo",f:"🇺🇾"}, {n:"Uzbekistan",c:"Taškent",f:"🇺🇿"}, {n:"Vanuatu",c:"Port Vila",f:"🇻🇺"},
-            {n:"Vatikaani",c:"Vatikaani",f:"🇻🇦"}, {n:"Venezuela",c:"Caracas",f:"🇻🇪"}, {n:"Jemen",c:"Sanaa",f:"🇾🇪"}, {n:"Zambia",c:"Lusaka",f:"🇿🇲"}, {n:"Zimbabwe",c:"Harare",f:"🇿🇼"}
+            {n:"Afganistan",c:"Kabul",f:"🇦🇫"},{n:"Alankomaat",c:"Amsterdam",f:"🇳🇱"},{n:"Albania",c:"Tirana",f:"🇦🇱"},{n:"Algeria",c:"Alger",f:"🇩🇿"},{n:"Andorra",c:"Andorra la Vella",f:"🇦🇩"},{n:"Angola",c:"Luanda",f:"🇦🇴"},{n:"Antigua ja Barbuda",c:"Saint John's",f:"🇦🇬"},{n:"Arabiemiirikunnat",c:"Abu Dhabi",f:"🇦🇪"},{n:"Argentiina",c:"Buenos Aires",f:"🇦🇷"},{n:"Armenia",c:"Jerevan",f:"🇦🇲"},
+            {n:"Australia",c:"Canberra",f:"🇦🇺"},{n:"Azerbaidžan",c:"Baku",f:"🇦🇿"},{n:"Bahama",c:"Nassau",f:"🇧🇸"},{n:"Bahrain",c:"Manama",f:"🇧🇭"},{n:"Bangladesh",c:"Dhaka",f:"🇧🇩"},{n:"Barbados",c:"Bridgetown",f:"🇧🇧"},{n:"Belgia",c:"Bryssel",f:"🇧🇪"},{n:"Belize",c:"Belmopan",f:"🇧🇿"},{n:"Benin",c:"Porto-Novo",f:"🇧🇯"},{n:"Bhutan",c:"Thimphu",f:"🇧🇹"},
+            {n:"Bolivia",c:"Sucre",f:"🇧🇴"},{n:"Bosnia ja Hertsegovina",c:"Sarajevo",f:"🇧🇦"},{n:"Botswana",c:"Gaborone",f:"🇧🇼"},{n:"Brasilia",c:"Brasília",f:"🇧🇷"},{n:"Brunei",c:"Bandar Seri Begawan",f:"🇧🇳"},{n:"Bulgaria",c:"Sofia",f:"🇧🇬"},{n:"Burkina Faso",c:"Ouagadougou",f:"🇧🇫"},{n:"Burundi",c:"Gitega",f:"🇧🇮"},{n:"Chile",c:"Santiago",f:"🇨🇱"},{n:"Costa Rica",c:"San José",f:"🇨🇷"},
+            {n:"Djibouti",c:"Djibouti",f:"🇩🇯"},{n:"Dominica",c:"Roseau",f:"🇩🇲"},{n:"Dominikaaninen tasavalta",c:"Santo Domingo",f:"🇩🇴"},{n:"Ecuador",c:"Quito",f:"🇪🇨"},{n:"Egypti",c:"Kairo",f:"🇪🇬"},{n:"El Salvador",c:"San Salvador",f:"🇸🇻"},{n:"Eritrea",c:"Asmara",f:"🇪🇷"},{n:"Espanja",c:"Madrid",f:"🇪🇸"},{n:"Eswatini",c:"Mbabane",f:"🇸🇿"},{n:"Etelä-Afrikka",c:"Pretoria",f:"🇿🇦"},
+            {n:"Etelä-Korea",c:"Soul",f:"🇰🇷"},{n:"Etelä-Sudan",c:"Juba",f:"🇸🇸"},{n:"Etiopia",c:"Addis Abeba",f:"🇪🇹"},{n:"Fidži",c:"Suva",f:"🇫🇯"},{n:"Filippiinit",c:"Manila",f:"🇵🇭"},{n:"Gabon",c:"Libreville",f:"🇬🇦"},{n:"Gambia",c:"Banjul",f:"🇬🇲"},{n:"Georgia",c:"Tbilisi",f:"🇬🇪"},{n:"Ghana",c:"Accra",f:"🇬🇭"},{n:"Grenada",c:"St. George's",f:"🇬🇩"},
+            {n:"Guatemala",c:"Guatemala",f:"🇬🇹"},{n:"Guinea",c:"Conakry",f:"🇬🇳"},{n:"Guinea-Bissau",c:"Bissau",f:"🇬🇼"},{n:"Guyana",c:"Georgetown",f:"🇬🇾"},{n:"Haiti",c:"Port-au-Prince",f:"🇭🇹"},{n:"Honduras",c:"Tegucigalpa",f:"🇭🇳"},{n:"Indonesia",c:"Jakarta",f:"🇮🇩"},{n:"Intia",c:"New Delhi",f:"🇮🇳"},{n:"Irak",c:"Bagdad",f:"🇮🇶"},{n:"Iran",c:"Teheran",f:"🇮🇷"},
+            {n:"Irlanti",c:"Dublin",f:"🇮🇪"},{n:"Islanti",c:"Reykjavík",f:"🇮🇸"},{n:"Israel",c:"Jerusalem",f:"🇮🇱"},{n:"Italia",c:"Rooma",f:"🇮🇹"},{n:"Itä-Timor",c:"Dili",f:"🇹🇱"},{n:"Itävalta",c:"Wien",f:"🇦🇹"},{n:"Jamaika",c:"Kingston",f:"🇯🇲"},{n:"Japani",c:"Tokio",f:"🇯🇵"},{n:"Jemen",c:"Sanaa",f:"🇾🇪"},{n:"Jordania",c:"Amman",f:"🇯🇴"},
+            {n:"Kambodža",c:"Phnom Penh",f:"🇰🇭"},{n:"Kamerun",c:"Yaoundé",f:"🇨🇲"},{n:"Kanada",c:"Ottawa",f:"🇨🇦"},{n:"Kap Verde",c:"Praia",f:"🇨🇻"},{n:"Kazakstan",c:"Astana",f:"🇰🇿"},{n:"Kenia",c:"Nairobi",f:"🇰🇪"},{n:"Keski-Afrikan tasavalta",c:"Bangui",f:"🇨🇫"},{n:"Kiina",c:"Peking",f:"🇨🇳"},{n:"Kirgisia",c:"Biškek",f:"🇰🇬"},{n:"Kiribati",c:"Tarawa",f:"🇰🇮"},
+            {n:"Kolumbia",c:"Bogotá",f:"🇨🇴"},{n:"Komorit",c:"Moroni",f:"🇰🇲"},{n:"Kongon demokraattinen tasavalta",c:"Kinshasa",f:"🇨🇩"},{n:"Kongon tasavalta",c:"Brazzaville",f:"🇨🇬"},{n:"Kreikka",c:"Ateena",f:"🇬🇷"},{n:"Kroatia",c:"Zagreb",f:"🇭🇷"},{n:"Kuuba",c:"Havanna",f:"🇨🇺"},{n:"Kuwait",c:"Kuwait",f:"🇰🇼"},{n:"Kypros",c:"Nikosia",f:"🇨🇾"},{n:"Laos",c:"Vientiane",f:"🇱🇦"},
+            {n:"Latvia",c:"Riika",f:"🇱🇻"},{n:"Lesotho",c:"Maseru",f:"🇱🇸"},{n:"Libanon",c:"Beirut",f:"🇱🇧"},{n:"Liberia",c:"Monrovia",f:"🇱🇷"},{n:"Libya",c:"Tripoli",f:"🇱🇾"},{n:"Liechtenstein",c:"Vaduz",f:"🇱🇮"},{n:"Liettua",c:"Vilna",f:"🇱🇹"},{n:"Luxemburg",c:"Luxemburg",f:"🇱🇺"},{n:"Madagaskar",c:"Antananarivo",f:"🇲🇬"},{n:"Malawi",c:"Lilongwe",f:"🇲🇼"},
+            {n:"Malediivit",c:"Malé",f:"🇲🇻"},{n:"Malesia",c:"Kuala Lumpur",f:"🇲🇾"},{n:"Mali",c:"Bamako",f:"🇲🇱"},{n:"Malta",c:"Valletta",f:"🇲🇹"},{n:"Marokko",c:"Rabat",f:"🇲🇦"},{n:"Marshallinsaaret",c:"Majuro",f:"🇲🇭"},{n:"Mauritania",c:"Nouakchott",f:"🇲🇷"},{n:"Mauritius",c:"Port Louis",f:"🇲🇺"},{n:"Meksiko",c:"México",f:"🇲🇽"},{n:"Mikronesia",c:"Palikir",f:"🇫🇲"},
+            {n:"Moldova",c:"Chișinău",f:"🇲🇩"},{n:"Monaco",c:"Monaco",f:"🇲🇨"},{n:"Mongolia",c:"Ulaanbaatar",f:"🇲🇳"},{n:"Montenegro",c:"Podgorica",f:"🇲🇪"},{n:"Mosambik",c:"Maputo",f:"🇲🇿"},{n:"Myanmar",c:"Naypyidaw",f:"🇲🇲"},{n:"Namibia",c:"Windhoek",f:"🇳🇦"},{n:"Nauru",c:"Yaren",f:"🇳🇷"},{n:"Nepal",c:"Katmandu",f:"🇳🇵"},{n:"Nicaragua",c:"Managua",f:"🇳🇮"},
+            {n:"Niger",c:"Niamey",f:"🇳🇪"},{n:"Nigeria",c:"Abuja",f:"🇳🇬"},{n:"Norja",c:"Oslo",f:"🇳🇴"},{n:"Norsunluurannikko",c:"Yamoussoukro",f:"🇨🇮"},{n:"Oman",c:"Masqat",f:"🇴🇲"},{n:"Pakistan",c:"Islamabad",f:"🇵🇰"},{n:"Palau",c:"Ngerulmud",f:"🇵🇼"},{n:"Palestiina",c:"Ramallah",f:"🇵🇸"},{n:"Panama",c:"Panama",f:"🇵🇦"},{n:"Papua-Uusi-Guinea",c:"Port Moresby",f:"🇵🇬"},
+            {n:"Paraguay",c:"Asunción",f:"🇵🇾"},{n:"Peru",c:"Lima",f:"🇵🇪"},{n:"Pohjois-Korea",c:"Pjongjang",f:"🇰🇵"},{n:"Pohjois-Makedonia",c:"Skopje",f:"🇲🇰"},{n:"Portugali",c:"Lissabon",f:"🇵🇹"},{n:"Puola",c:"Varsova",f:"🇵🇱"},{n:"Päiväntasaajan Guinea",c:"Malabo",f:"🇬🇶"},{n:"Qatar",c:"Doha",f:"🇶🇦"},{n:"Ranska",c:"Pariisi",f:"🇫🇷"},{n:"Romania",c:"Bukarest",f:"🇷🇴"},
+            {n:"Ruanda",c:"Kigali",f:"🇷🇼"},{n:"Ruotsi",c:"Tukholma",f:"🇸🇪"},{n:"Saint Kitts ja Nevis",c:"Basseterre",f:"🇰🇳"},{n:"Saint Lucia",c:"Castries",f:"🇱🇨"},{n:"Saint Vincent ja Grenadiinit",c:"Kingstown",f:"🇻🇨"},{n:"Saksa",c:"Berliini",f:"🇩🇪"},{n:"Salomonsaaret",c:"Honiara",f:"🇸🇧"},{n:"Sambia",c:"Lusaka",f:"🇿🇲"},{n:"Samoa",c:"Apia",f:"🇼🇸"},{n:"San Marino",c:"San Marino",f:"🇸🇲"},
+            {n:"São Tomé ja Príncipe",c:"São Tomé",f:"🇸🇹"},{n:"Saudi-Arabia",c:"Riad",f:"🇸🇦"},{n:"Senegal",c:"Dakar",f:"🇸🇳"},{n:"Serbia",c:"Belgrad",f:"🇷🇸"},{n:"Seychellit",c:"Victoria",f:"🇸🇨"},{n:"Sierra Leone",c:"Freetown",f:"🇸🇱"},{n:"Singapore",c:"Singapore",f:"🇸🇬"},{n:"Slovakia",c:"Bratislava",f:"🇸🇰"},{n:"Slovenia",c:"Ljubljana",f:"🇸🇮"},{n:"Somalia",c:"Mogadishu",f:"🇸🇴"},
+            {n:"Sri Lanka",c:"Sri Jayewardenepura Kotte",f:"🇱🇰"},{n:"Sudan",c:"Khartum",f:"🇸🇩"},{n:"Suomi",c:"Helsinki",f:"🇫🇮"},{n:"Suriname",c:"Paramaribo",f:"🇸🇷"},{n:"Sveitsi",c:"Bern",f:"🇨🇭"},{n:"Syyria",c:"Damaskos",f:"🇸🇾"},{n:"Tadžikistan",c:"Dušanbe",f:"🇹🇯"},{n:"Tansania",c:"Dodoma",f:"🇹🇿"},{n:"Tanska",c:"Kööpenhamina",f:"🇩🇰"},{n:"Thaimaa",c:"Bangkok",f:"🇹🇭"},
+            {n:"Togo",c:"Lomé",f:"🇹🇬"},{n:"Tonga",c:"Nuku'alofa",f:"🇹🇴"},{n:"Trinidad ja Tobago",c:"Port of Spain",f:"🇹🇹"},{n:"Tšad",c:"N'Djamena",f:"🇹🇩"},{n:"Tšekki",c:"Praha",f:"🇨🇿"},{n:"Tunisia",c:"Tunis",f:"🇹🇳"},{n:"Turkki",c:"Ankara",f:"🇹🇷"},{n:"Turkmenistan",c:"Ašgabat",f:"🇹🇲"},{n:"Tuvalu",c:"Funafuti",f:"🇹🇻"},{n:"Uganda",c:"Kampala",f:"🇺🇬"},
+            {n:"Ukraina",c:"Kiova",f:"🇺🇦"},{n:"Unkari",c:"Budapest",f:"🇭🇺"},{n:"Uruguay",c:"Montevideo",f:"🇺🇾"},{n:"Uusi-Seelanti",c:"Wellington",f:"🇳🇿"},{n:"Uzbekistan",c:"Taškent",f:"🇺🇿"},{n:"Valko-Venäjä",c:"Minsk",f:"🇧🇾"},{n:"Vanuatu",c:"Port Vila",f:"🇻🇺"},{n:"Vatikaanivaltio",c:"Vatikaani",f:"🇻🇦"},{n:"Venezuela",c:"Caracas",f:"🇻🇪"},{n:"Venäjä",c:"Moskova",f:"🇷🇺"},
+            {n:"Vietnam",c:"Hanoi",f:"🇻🇳"},{n:"Viro",c:"Tallinna",f:"🇪🇪"},{n:"Yhdysvallat",c:"Washington, D.C.",f:"🇺🇸"},{n:"Yhdistynyt kuningaskunta",c:"Lontoo",f:"🇬🇧"},{n:"Zimbabwe",c:"Harare",f:"🇿🇼"}
         ];
 
         let state = {
